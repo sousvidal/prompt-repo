@@ -23,6 +23,7 @@ import DiscardChangesDialog from "~/components/discard-changes-dialog";
 import { useCallback, useEffect, useState } from 'react';
 import TestPromptDialog from '~/components/test-prompt-dialog';
 import CommitDialog from '~/components/commit-dialog';
+import PublishDialog from '~/components/publish-dialog';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const prisma = new PrismaClient();
@@ -114,10 +115,6 @@ export default function PromptDetails() {
     });
   }
 
-  const handlePublish = () => {
-    console.log('Publish');
-  }
-
   const showDialog = (onConfirm: () => void) => {
     setDialog({
       onConfirm,
@@ -149,6 +146,11 @@ export default function PromptDetails() {
 
   const handleTest = () => {
     setIsTestDialogOpen(true);
+  }
+
+  const handlePublish = (environments: string[]) => {
+    console.log('Publish', environments);
+    
   }
 
   return (
@@ -184,7 +186,7 @@ export default function PromptDetails() {
         <div className="flex flex-row gap-2 justify-end">
           <Button variant="outline" disabled={!canTest} onClick={handleTest}>Test</Button>
           <CommitDialog isDisabled={!canCommit} onCommit={handleCommit} />
-          <Button variant="default" disabled={!canPublish} color="green" onClick={handlePublish}>Publish</Button>
+          <PublishDialog isDisabled={!canPublish} onPublish={handlePublish} /> 
         </div>
       </div>
       <Card>

@@ -45,14 +45,6 @@ model Prompt {
   commits     Commit[]
 }
 
-model Environment {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  publishedCommits PublishedCommit[]
-}
-
 model Commit {
   id          String   @id @default(cuid())
   prompt      Prompt   @relation(fields: [promptId], references: [id])
@@ -65,11 +57,10 @@ model Commit {
 }
 
 model PublishedCommit {
-  id        String   @id @default(cuid())
-  commit    Commit   @relation(fields: [commitId], references: [id])
-  commitId  String
-  environment Environment @relation(fields: [environmentId], references: [id])
-  environmentId String
+  id          String   @id @default(cuid())
+  commit      Commit   @relation(fields: [commitId], references: [id])
+  commitId    String
+  environment String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
