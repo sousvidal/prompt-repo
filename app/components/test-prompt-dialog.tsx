@@ -1,6 +1,6 @@
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog';
-import { useNavigate, useParams, useOutletContext, useFetcher } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import { Input } from "~/components/ui/input";
 import { SendIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -91,6 +91,12 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
 
   useEffect(() => {
     if (!lastDataTimestamp.current) {
+      setMessages([context.message]);
+    }
+  }, [context.message]);
+
+  useEffect(() => {
+    if (context.message) {
       setMessages([context.message]);
     }
   }, [context.message]);
