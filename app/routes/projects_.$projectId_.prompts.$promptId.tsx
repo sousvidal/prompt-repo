@@ -21,6 +21,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import DiscardChangesDialog from "~/components/discard-changes-dialog";
 import { useCallback, useEffect, useState } from 'react';
+import TestPromptDialog from '~/components/test-prompt-dialog';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const prisma = new PrismaClient();
@@ -44,6 +45,7 @@ export default function PromptDetails() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCommitId, setSelectedCommitId] = useState<string>(searchParams.get('commit') || 'draft');
+  const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
 
   const [draft, setDraft] = useState({
     role: 'system',
@@ -115,7 +117,7 @@ export default function PromptDetails() {
   }, [draft, selectedCommitId]);
 
   const handleTest = () => {
-    navigate(`/projects/${params.projectId}/prompts/${params.promptId}/test`);
+    setIsTestDialogOpen(true);
   }
 
   const handleCommitValueChange = (value: string) => {
@@ -196,6 +198,13 @@ export default function PromptDetails() {
         title="Discard changes"
         description="Are you sure you want to discard the changes to your current draft?"
         isOpen={dialog?.isOpen || false}
+      />
+      <TestPromptDialog
+        context={{
+          message,
+        }}
+        isOpen={isTestDialogOpen}
+        onClose={() => setIsTestDialogOpen(false)}
       />
       <Outlet context={{
         message,
