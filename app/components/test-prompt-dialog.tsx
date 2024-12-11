@@ -96,10 +96,10 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
   }, [context.message]);
 
   useEffect(() => {
-    if (context.message) {
+    if (context.message && isOpen) {
       setMessages([context.message]);
     }
-  }, [context.message]);
+  }, [context.message, isOpen]);
 
   const handleClose = (open: boolean) => {
     if (!open) {
