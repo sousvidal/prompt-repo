@@ -4,7 +4,6 @@ import { PrismaClient } from "@prisma/client";
 export async function action({ request, params }: ActionFunctionArgs) {
   const prisma = new PrismaClient();
   const body = await request.json();
-  console.log(body);
   const { role, content, description } = body;
 
   let commit = null;

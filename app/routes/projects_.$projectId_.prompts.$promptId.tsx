@@ -22,6 +22,7 @@ import { Button } from "~/components/ui/button";
 import DiscardChangesDialog from "~/components/discard-changes-dialog";
 import { useCallback, useEffect, useState } from 'react';
 import TestPromptDialog from '~/components/test-prompt-dialog';
+import CommitDialog from '~/components/commit-dialog';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const prisma = new PrismaClient();
@@ -31,7 +32,10 @@ export async function loader({ params }: LoaderFunctionArgs) {
       commits: {
         include: {
           messages: true
-        }
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
       }
     }
   });
@@ -41,8 +45,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function PromptDetails() {
   const params = useParams();
-  const prompt: Prompt | null = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const prompt: Prompt | null = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCommitId, setSelectedCommitId] = useState<string>(searchParams.get('commit') || 'draft');
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
@@ -60,13 +64,21 @@ export default function PromptDetails() {
   } | null>(null);
 
   useEffect(() => {
-    if (prompt && !searchParams.get('commit')) {
-      const commits = prompt.commits || [];
-      const selectedCommitId = commits.length > 0 ? commits[0].id : 'draft';
-      setSelectedCommitId(selectedCommitId);
+    if (prompt || (prompt && searchParams.get('commit'))) {
+      if (searchParams.get('commit')) {
+        const commit = prompt?.commits.find(commit => commit.id === searchParams.get('commit'));
+        if (commit) {
+          setSelectedCommitId(commit.id);
+        } else {
+          setSelectedCommitId('draft');
+        }
+      } else {
+        const commits = prompt?.commits || [];
+        const selectedCommitId = commits.length > 0 ? commits[0].id : 'draft';
+        setSelectedCommitId(selectedCommitId);
+      }
     }
   }, [prompt, searchParams]);
-
 
   const getCommit = (commitId: string) => {
     return prompt?.commits.find(commit => commit.id === commitId);
@@ -78,14 +90,28 @@ export default function PromptDetails() {
   const message = selectedCommitId === 'draft' ? draft : getCommit(selectedCommitId)?.messages[0];
   const canTest = message?.role && message?.content;
 
-  const handleCommit = async () => {
-    console.log('Commit');
+  const handleCommit = async (description: string) => {
     const response = await fetch(`/api/projects/${params.projectId}/prompts/${params.promptId}/commits`, {
       method: 'POST',
-      body: JSON.stringify(draft),
+      body: JSON.stringify({
+        ...draft,
+        description,
+      }),
     });
-    const data = await response.json();
-    console.log(data);
+    const commit = await response.json();
+
+    // empty the draft
+    setDraft({
+      role: 'system',
+      content: '',
+      description: '',
+    });
+
+    // refresh the page
+    navigate({
+      pathname: '.',
+      search: `?commit=${commit.id}`,
+    });
   }
 
   const handlePublish = () => {
@@ -98,6 +124,11 @@ export default function PromptDetails() {
       isOpen: true,
     });
   }
+
+  const handleCommitValueChange = useCallback((value: string) => {
+    setSelectedCommitId(value);
+    setSearchParams({ commit: value });
+  }, [setSelectedCommitId, setSearchParams]);
 
   const handleEditDraft = useCallback((key: string, value: string) => {
     const editDraft = () => {
@@ -114,15 +145,10 @@ export default function PromptDetails() {
     } else {
       editDraft();
     }
-  }, [draft, selectedCommitId]);
+  }, [draft, selectedCommitId, handleCommitValueChange]);
 
   const handleTest = () => {
     setIsTestDialogOpen(true);
-  }
-
-  const handleCommitValueChange = (value: string) => {
-    setSelectedCommitId(value);
-    setSearchParams({ commit: value });
   }
 
   return (
@@ -145,7 +171,7 @@ export default function PromptDetails() {
                 <SelectLabel>Commits</SelectLabel>
                 {hasDraft && <SelectItem value="draft">Draft</SelectItem>}
                 {prompt?.commits.map((commit) => {
-                  const isLatest = commit.id === prompt.commits[prompt.commits.length - 1].id;
+                  const isLatest = commit.id === prompt.commits[0].id;
                   return (
                     <SelectItem key={commit.id} value={commit.id}>
                       {isLatest ? '(latest) ' : ''}{commit.description || commit.id}</SelectItem>
@@ -157,7 +183,7 @@ export default function PromptDetails() {
         </div>
         <div className="flex flex-row gap-2 justify-end">
           <Button variant="outline" disabled={!canTest} onClick={handleTest}>Test</Button>
-          <Button variant="default" disabled={!canCommit} onClick={handleCommit}>Commit</Button>
+          <CommitDialog isDisabled={!canCommit} onCommit={handleCommit} />
           <Button variant="default" disabled={!canPublish} color="green" onClick={handlePublish}>Publish</Button>
         </div>
       </div>
