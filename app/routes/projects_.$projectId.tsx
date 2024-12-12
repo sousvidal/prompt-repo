@@ -105,9 +105,13 @@ export default function ProjectDetails() {
             </div>
           </CardContent>
       </Card>
-      <h1 className="text-2xl font-bold">Prompts</h1>
-      <div className="flex justify-end">
-        <CreatePromptDialog />
+      <div className="flex flex-row justify-between items-center mt-4">
+        <div className="text-2xl font-bold">
+          Prompts
+        </div>
+        <div className="flex justify-end">
+          <CreatePromptDialog />
+        </div>
       </div>
       <div className="py-4">
         <DataTable columns={columns} data={project?.prompts ?? []} />

@@ -25,6 +25,7 @@ import TestPromptDialog from '~/components/test-prompt-dialog';
 import CommitDialog from '~/components/commit-dialog';
 import PublishDialog from '~/components/publish-dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
+import { Badge } from '~/components/ui/badge';
 import { toast } from 'sonner';
 import { PlayIcon } from 'lucide-react';
 
@@ -36,6 +37,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       commits: {
         include: {
           messages: true,
+          publishedCommits: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -155,9 +157,23 @@ export default function PromptDetails() {
     setIsTestDialogOpen(true);
   }
 
-  const handlePublish = (environments: string[]) => {
-    console.log('Publish', environments);
-  }
+  const handlePublish = useCallback(async (environments: string[]) => {
+    await fetch(`/api/projects/${params.projectId}/prompts/${params.promptId}/commits/${selectedCommitId}/publish`, {
+      method: 'POST',
+      body: JSON.stringify({
+        environments,
+      }),
+    });
+
+    // refresh the page
+    navigate({
+      pathname: '.',
+      search: `?commit=${selectedCommitId}`,
+    });
+
+    // toast
+    toast.success('Published successfully.');
+  }, [params.projectId, params.promptId, selectedCommitId, navigate]);
 
   return (
     <div className="flex flex-col m-4 container mx-auto gap-4">
@@ -186,13 +202,13 @@ export default function PromptDetails() {
           <CardDescription>{prompt?.description}</CardDescription>
         </CardHeader>
       </Card>
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-row justify-between mt-4">
         <div className="flex flex-row gap-2">
           <Select defaultValue="draft" value={selectedCommitId} onValueChange={handleCommitValueChange}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-[350px]">
               <SelectValue placeholder="Select a commit" />
             </SelectTrigger>
-            <SelectContent className="max-w-[300px]">
+            <SelectContent className="max-w-[350px]">
               <SelectGroup>
                 <SelectLabel>Commits</SelectLabel>
                 {hasDraft && <SelectItem value="draft">Draft</SelectItem>}
@@ -200,7 +216,17 @@ export default function PromptDetails() {
                   const isLatest = commit.id === prompt.commits[0].id;
                   return (
                     <SelectItem key={commit.id} value={commit.id} className="truncate">
-                      {isLatest ? '(latest) ' : ''}{commit.description || commit.id}
+                      <div className="flex flex-row justify-between w-[300px]">
+                        <div className="flex gap-2 items-center">
+                          {isLatest ? <Badge variant="secondary">Latest</Badge> : ''}
+                          {commit.description || commit.id}
+                        </div>
+                        {/* <div className="flex justify-end items-center">
+                          <Circle className="w-4 h-4" fill="#65a30d" stroke="#65a30d" />
+                          <Circle className="w-4 h-4" fill="#f97316" stroke="#f97316" />
+                          <Circle className="w-4 h-4" fill="#cbd5e1" stroke="#cbd5e1" />
+                        </div> */}
+                      </div>
                     </SelectItem>
                   )
                 })}
@@ -214,7 +240,7 @@ export default function PromptDetails() {
             Test
           </Button>
           <CommitDialog isDisabled={!canCommit} onCommit={handleCommit} />
-          <PublishDialog isDisabled={!canPublish} onPublish={handlePublish} /> 
+          <PublishDialog isDisabled={!canPublish} onPublish={handlePublish} commit={getCommit(selectedCommitId)} /> 
         </div>
       </div>
       <Card>

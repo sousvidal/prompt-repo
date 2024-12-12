@@ -11,15 +11,15 @@ import {
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { useState } from "react";
-import { ArrowUpRightIcon, UploadCloudIcon, UploadIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
+import { Commit } from "@prisma/client";
 
-
-export default function PublishDialog({ isDisabled, onPublish }: { isDisabled: boolean, onPublish: (environments: string[]) => void }) {
+export default function PublishDialog({ isDisabled, onPublish, commit }: { isDisabled: boolean, onPublish: (environments: string[]) => void, commit: Commit | null }) {
   const [environments, setEnvironments] = useState<string[]>([]);
   
   const handleOpenChange = (open: boolean) => {
     if (open) {
-      setEnvironments([]);
+      setEnvironments(commit?.publishedCommits.map(publishedCommit => publishedCommit.environment) || []);
     }
   }
 
@@ -47,6 +47,8 @@ export default function PublishDialog({ isDisabled, onPublish }: { isDisabled: b
       </div>
     )
   }
+
+  const canUnpublish = commit?.publishedCommits.length > 0;
 
   return (
     <Dialog onOpenChange={handleOpenChange}>
@@ -78,10 +80,10 @@ export default function PublishDialog({ isDisabled, onPublish }: { isDisabled: b
           <DialogClose asChild>
             <Button
               type="submit"
-              disabled={environments.length === 0}
+              disabled={environments.length === 0 && !canUnpublish}
               onClick={() => onPublish(environments)}
             >
-              Publish
+              {environments.length === 0 && canUnpublish ? 'Unpublish' : 'Publish'}
             </Button>
           </DialogClose>
         </DialogFooter>

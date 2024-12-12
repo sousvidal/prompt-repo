@@ -6,14 +6,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const body = await request.json();
   const { environments } = body;
 
-  let commit = null;
   if (params.commitId && params.promptId && params.projectId) {
-    commit = await prisma.commit.findUnique({
+    const commit = await prisma.commit.findUnique({
       where: { id: params.commitId, promptId: params.promptId },
       include: {
         publishedCommits: true,
       },
     });
+
+    if (commit) {
+      // remove all published commits for this commit
+      // NOTE: this is a lazy way to do this, but I don't care.
+      await prisma.publishedCommit.deleteMany({
+        where: { commitId: commit.id },
+      });
+
+      // create new published commits
+      await prisma.publishedCommit.createMany({ 
+        data: environments.map((environment: string) => ({
+          commitId: commit.id,
+          environment,
+        })),
+      });
+    }
   }
 
   prisma.$disconnect();
