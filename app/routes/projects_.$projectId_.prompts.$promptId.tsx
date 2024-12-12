@@ -27,7 +27,8 @@ import PublishDialog from '~/components/publish-dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { Badge } from '~/components/ui/badge';
 import { toast } from 'sonner';
-import { PlayIcon } from 'lucide-react';
+import { Circle, PlayIcon } from 'lucide-react';
+import PublishedCircles from '~/components/published-circles';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const prisma = new PrismaClient();
@@ -221,11 +222,9 @@ export default function PromptDetails() {
                           {isLatest ? <Badge variant="secondary">Latest</Badge> : ''}
                           {commit.description || commit.id}
                         </div>
-                        {/* <div className="flex justify-end items-center">
-                          <Circle className="w-4 h-4" fill="#65a30d" stroke="#65a30d" />
-                          <Circle className="w-4 h-4" fill="#f97316" stroke="#f97316" />
-                          <Circle className="w-4 h-4" fill="#cbd5e1" stroke="#cbd5e1" />
-                        </div> */}
+                        <div className="flex justify-end items-center">
+                          <PublishedCircles publishedCommits={commit.publishedCommits} />
+                        </div>
                       </div>
                     </SelectItem>
                   )
