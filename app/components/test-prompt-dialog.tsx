@@ -2,8 +2,9 @@ import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog';
 import { useFetcher } from "@remix-run/react";
 import { Input } from "~/components/ui/input";
-import { SendIcon } from "lucide-react";
+import { Loader2, SendIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ScrollArea } from "./ui/scroll-area";
 
 type Message = {
   role: 'system' | 'user' | 'assistant';
@@ -11,7 +12,7 @@ type Message = {
 }
 
 export default function TestPromptDialog({ context, isOpen, onClose }: { context: { message: Message }, isOpen: boolean, onClose: () => void }) {
-  const [messages, setMessages] = useState<Message[]>([context.message]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
   const fetcher = useFetcher();
   const lastDataTimestamp = useRef(0);
@@ -19,7 +20,7 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
 
   const renderSystemMessage = (message: Message, index: number) => {
     return (
-      <div key={index} className="flex flex-col border border-gray-200 rounded-md p-2 bg-gray-100">
+      <div key={index} className="mt-4 flex flex-col border border-gray-200 rounded-md p-2 bg-gray-100">
         <p className="text-sm text-gray-500">System</p>
         <p>{message.content}</p>
       </div>
@@ -28,7 +29,7 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
 
   const renderUserMessage = (message: Message, index: number) => {
     return (
-      <div key={index} className="flex flex-col border border-gray-200 rounded-md p-2">
+      <div key={index} className="mt-4 flex flex-col border border-gray-200 rounded-md p-2">
         <p className="text-sm text-gray-500 text-right">User</p>
         <p className="text-right">{message.content}</p>
       </div>
@@ -37,7 +38,7 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
 
   const renderAssistantMessage = (message: Message, index: number) => {
     return (
-      <div key={index} className="flex flex-col border border-gray-200 rounded-md p-2 bg-gray-100">
+      <div key={index} className="mt-4 flex flex-col border border-gray-200 rounded-md p-2 bg-gray-100">
         <p className="text-sm text-gray-500">Assistant</p>
         <p>{message.content}</p>
       </div>
@@ -90,16 +91,10 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
   }, [messages]);
 
   useEffect(() => {
-    if (!lastDataTimestamp.current) {
+    if (context.message && isOpen && messages.length === 0) {
       setMessages([context.message]);
     }
-  }, [context.message]);
-
-  useEffect(() => {
-    if (context.message && isOpen) {
-      setMessages([context.message]);
-    }
-  }, [context.message, isOpen]);
+  }, [context.message, isOpen, messages.length]);
 
   const handleClose = (open: boolean) => {
     if (!open) {
@@ -108,16 +103,18 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
     }
   }
 
+  const isLoading = fetcher.state === 'loading' || fetcher.state === 'submitting';
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Test Prompt</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto max-h-[500px] pr-4">
+        <ScrollArea className="max-h-[500px] pr-4">
           {renderMessages(messages)}
           <div ref={messagesContainerRef}>&nbsp;</div>
-        </div>
+        </ScrollArea>
         <DialogFooter>
           <Input
             type="text"
@@ -131,7 +128,7 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
             }}
           />
           <Button onClick={handleSendMessage} disabled={!text || text.length === 0}>
-            <SendIcon className="w-4 h-4" />
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <SendIcon className="w-4 h-4" />}
           </Button>
         </DialogFooter>
       </DialogContent>
