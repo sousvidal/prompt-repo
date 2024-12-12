@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useState } from "react";
+import { CheckIcon } from "lucide-react";
 
 
 export default function CommitDialog({ isDisabled, onCommit }: { isDisabled: boolean, onCommit: (description: string) => void }) {
@@ -27,12 +28,16 @@ export default function CommitDialog({ isDisabled, onCommit }: { isDisabled: boo
     <Dialog onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button disabled={isDisabled}>
+          <CheckIcon className="w-4 h-4" />
           Commit
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Commit</DialogTitle>
+          <DialogTitle className="flex flex-row gap-2 items-center">
+            <CheckIcon className="w-4 h-4" />
+            Commit
+          </DialogTitle>
         </DialogHeader>
         <DialogDescription>
           Commit your changes to the repository.
@@ -45,7 +50,7 @@ export default function CommitDialog({ isDisabled, onCommit }: { isDisabled: boo
             <Input
               id="description"
               name="description"
-              placeholder="A commit message"
+              placeholder="A short description of your changes"
               className="col-span-3"
               required
               value={description}

@@ -1,8 +1,8 @@
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '~/components/ui/dialog';
 import { useFetcher } from "@remix-run/react";
 import { Input } from "~/components/ui/input";
-import { Loader2, SendIcon } from "lucide-react";
+import { Loader2, PlayIcon, SendIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
 
@@ -109,7 +109,13 @@ export default function TestPromptDialog({ context, isOpen, onClose }: { context
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Test Prompt</DialogTitle>
+          <DialogTitle className="flex flex-row gap-2 items-center">
+            <PlayIcon className="w-4 h-4" />
+            Test
+          </DialogTitle>
+          <DialogDescription>
+            Test your prompt directly in the browser.
+          </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[500px] pr-4">
           {renderMessages(messages)}

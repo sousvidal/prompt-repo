@@ -11,6 +11,7 @@ import {
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { useState } from "react";
+import { ArrowUpRightIcon, UploadCloudIcon, UploadIcon } from "lucide-react";
 
 
 export default function PublishDialog({ isDisabled, onPublish }: { isDisabled: boolean, onPublish: (environments: string[]) => void }) {
@@ -51,12 +52,16 @@ export default function PublishDialog({ isDisabled, onPublish }: { isDisabled: b
     <Dialog onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button disabled={isDisabled}>
+          <UploadIcon className="w-4 h-4" />
           Publish
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Publish</DialogTitle>
+          <DialogTitle className="flex flex-row gap-2 items-center">
+            <UploadIcon className="w-4 h-4" />
+            Publish
+          </DialogTitle>
         </DialogHeader>
         <DialogDescription>
           Publish this commit to an environment.

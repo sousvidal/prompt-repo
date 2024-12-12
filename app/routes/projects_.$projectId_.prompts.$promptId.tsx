@@ -25,6 +25,8 @@ import TestPromptDialog from '~/components/test-prompt-dialog';
 import CommitDialog from '~/components/commit-dialog';
 import PublishDialog from '~/components/publish-dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
+import { toast } from 'sonner';
+import { PlayIcon } from 'lucide-react';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const prisma = new PrismaClient();
@@ -115,6 +117,9 @@ export default function PromptDetails() {
       pathname: '.',
       search: `?commit=${commit.id}`,
     });
+
+    // toast
+    toast.success('Commit saved successfully.');
   }
 
   const showDialog = (onConfirm: () => void) => {
@@ -184,18 +189,19 @@ export default function PromptDetails() {
       <div className="flex flex-row justify-between">
         <div className="flex flex-row gap-2">
           <Select defaultValue="draft" value={selectedCommitId} onValueChange={handleCommitValueChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select a commit" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-w-[300px]">
               <SelectGroup>
                 <SelectLabel>Commits</SelectLabel>
                 {hasDraft && <SelectItem value="draft">Draft</SelectItem>}
                 {prompt?.commits.map((commit) => {
                   const isLatest = commit.id === prompt.commits[0].id;
                   return (
-                    <SelectItem key={commit.id} value={commit.id}>
-                      {isLatest ? '(latest) ' : ''}{commit.description || commit.id}</SelectItem>
+                    <SelectItem key={commit.id} value={commit.id} className="truncate">
+                      {isLatest ? '(latest) ' : ''}{commit.description || commit.id}
+                    </SelectItem>
                   )
                 })}
               </SelectGroup>
@@ -203,7 +209,10 @@ export default function PromptDetails() {
           </Select>
         </div>
         <div className="flex flex-row gap-2 justify-end">
-          <Button variant="outline" disabled={!canTest} onClick={handleTest}>Test</Button>
+          <Button variant="outline" disabled={!canTest} onClick={handleTest}>
+            <PlayIcon className="w-4 h-4" />
+            Test
+          </Button>
           <CommitDialog isDisabled={!canCommit} onCommit={handleCommit} />
           <PublishDialog isDisabled={!canPublish} onPublish={handlePublish} /> 
         </div>
