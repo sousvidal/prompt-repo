@@ -14,6 +14,7 @@ import {
 import CreatePromptDialog from '~/components/create-prompt-dialog';
 import { generateSlug } from '~/lib/slug';
 import { ColumnDef } from '@tanstack/react-table';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 
 type PromptFormData = {
   name: string;
@@ -68,7 +69,21 @@ export default function ProjectDetails() {
 
   return (
   <div className="flex flex-col m-4 container mx-auto gap-4">
-      <h1 className="text-2xl font-bold">Project</h1>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{project?.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <Card>
         <CardHeader>
           <CardTitle>{project?.name}</CardTitle>

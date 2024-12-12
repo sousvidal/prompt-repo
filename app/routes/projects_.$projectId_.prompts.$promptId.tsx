@@ -24,6 +24,7 @@ import { useCallback, useEffect, useState } from 'react';
 import TestPromptDialog from '~/components/test-prompt-dialog';
 import CommitDialog from '~/components/commit-dialog';
 import PublishDialog from '~/components/publish-dialog';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const prisma = new PrismaClient();
@@ -32,12 +33,13 @@ export async function loader({ params }: LoaderFunctionArgs) {
     include: {
       commits: {
         include: {
-          messages: true
+          messages: true,
         },
         orderBy: {
           createdAt: 'desc',
         },
-      }
+      },
+      project: true,
     }
   });
   prisma.$disconnect();
@@ -150,12 +152,29 @@ export default function PromptDetails() {
 
   const handlePublish = (environments: string[]) => {
     console.log('Publish', environments);
-    
   }
 
   return (
     <div className="flex flex-col m-4 container mx-auto gap-4">
-      <h1 className="text-2xl font-bold">Prompt</h1>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href={`/projects/${params.projectId}`}>{prompt?.project.name}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{prompt?.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <Card>
         <CardHeader>
           <CardTitle>{prompt?.name}</CardTitle>

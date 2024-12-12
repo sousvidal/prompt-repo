@@ -6,6 +6,7 @@ import { TrashIcon } from 'lucide-react';
 import CreateProjectDialog from '~/components/create-project-dialog';
 import { DataTable } from '~/components/datatable';
 import { Button } from '~/components/ui/button';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 
 const generateSlug = (name: string) => {
   return name.toLowerCase().replace(/ /g, '-');
@@ -59,7 +60,17 @@ export default function Projects() {
 
   return (
     <div className="flex flex-col m-4 container mx-auto">
-      <h1 className="text-2xl font-bold">Projects</h1>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Projects</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <div className="flex justify-end">
         <CreateProjectDialog />
       </div>
