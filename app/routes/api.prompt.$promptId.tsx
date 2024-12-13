@@ -43,7 +43,15 @@ export async function loader({ request, params }: ActionFunctionArgs) {
     });
 
     if (!project) {
+      return Response.json({ error: 'Incorrect API key.' }, { status: 401 });
+    }
+
+    if (!project.prompts || project.prompts.length === 0) {
       return Response.json({ error: 'Could not find the prompt.' }, { status: 404 });
+    }
+
+    if (!project.prompts[0].commits || project.prompts[0].commits.length === 0) {
+      return Response.json({ error: 'Could not find the commit.' }, { status: 404 });
     }
 
     const commit = project.prompts[0].commits[0];
