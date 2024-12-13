@@ -27,7 +27,7 @@ import PublishDialog from '~/components/publish-dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { Badge } from '~/components/ui/badge';
 import { toast } from 'sonner';
-import { Circle, PlayIcon } from 'lucide-react';
+import { PlayIcon } from 'lucide-react';
 import PublishedCircles from '~/components/published-circles';
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -266,7 +266,7 @@ export default function PromptDetails() {
             </Select>
             <Textarea
               placeholder="Message"
-              className="h-[200px]"
+              className="h-[300px]"
               value={message?.content}
               onChange={(e) => handleEditDraft('content', e.target.value)} />
           </div>

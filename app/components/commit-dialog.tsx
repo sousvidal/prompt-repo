@@ -14,7 +14,6 @@ import { Input } from "./ui/input";
 import { useState } from "react";
 import { CheckIcon } from "lucide-react";
 
-
 export default function CommitDialog({ isDisabled, onCommit }: { isDisabled: boolean, onCommit: (description: string) => void }) {
   const [description, setDescription] = useState('');
 
