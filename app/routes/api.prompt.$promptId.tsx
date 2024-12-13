@@ -1,7 +1,7 @@
 import { ActionFunctionArgs } from "@remix-run/node";
 import { PrismaClient } from "@prisma/client";
 
-export async function action({ request, params }: ActionFunctionArgs) {
+export async function loader({ request, params }: ActionFunctionArgs) {
   const prisma = new PrismaClient();
   const bearerToken = await request.headers.get('Authorization');
   const apiKey = bearerToken?.split(' ')[1];
