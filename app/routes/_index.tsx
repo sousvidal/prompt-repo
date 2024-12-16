@@ -1,6 +1,7 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useEffect } from "react";
-import { useNavigate } from "@remix-run/react";
+import { redirect, useNavigate } from "@remix-run/react";
+import { isAuthenticated } from "~/services/auth.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -8,6 +9,14 @@ export const meta: MetaFunction = () => {
     { name: "description", content: "Prompt Repo" },
   ];
 };
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  if (await isAuthenticated(request)) {
+    throw redirect("/projects");
+  }
+
+  throw redirect("/login");
+}
 
 export default function Index() {
   const navigate = useNavigate();

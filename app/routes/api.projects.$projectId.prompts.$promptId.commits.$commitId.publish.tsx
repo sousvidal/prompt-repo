@@ -1,7 +1,12 @@
 import { ActionFunctionArgs } from "@remix-run/node";
 import { PrismaClient } from "@prisma/client";
+import { isAuthenticated } from "~/services/auth.server";
 
 export async function action({ request, params }: ActionFunctionArgs) {
+  if (!await isAuthenticated(request)) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const prisma = new PrismaClient();
   const body = await request.json();
   const { environments } = body;

@@ -1,5 +1,5 @@
 import { PrismaClient, Project } from '@prisma/client'
-import { ActionFunctionArgs } from '@remix-run/node';
+import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { Link, redirect, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { TrashIcon } from 'lucide-react';
@@ -7,12 +7,15 @@ import CreateProjectDialog from '~/components/create-project-dialog';
 import { DataTable } from '~/components/datatable';
 import { Button } from '~/components/ui/button';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
+import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 
 const generateSlug = (name: string) => {
   return name.toLowerCase().replace(/ /g, '-');
 }
 
-export async function loader(): Promise<Project[]> {
+export async function loader({ request }: LoaderFunctionArgs): Promise<Project[]> {
+  await redirectToLoginIfNotAuthenticated(request);
+
   const prisma = new PrismaClient();
   const projects = await prisma.project.findMany();
   prisma.$disconnect();

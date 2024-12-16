@@ -1,6 +1,16 @@
 import { Button } from "~/components/ui/button";
 import { GitGraphIcon } from "lucide-react";
-import { useNavigate } from "@remix-run/react";
+import { redirect, useNavigate } from "@remix-run/react";
+import { isAuthenticated } from "~/services/auth.server";
+import { LoaderFunctionArgs } from "@remix-run/node";
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  if (await isAuthenticated(request)) {
+    throw redirect("/projects");
+  }
+
+  return null;
+}
 
 export default function Login() {
   const navigate = useNavigate();

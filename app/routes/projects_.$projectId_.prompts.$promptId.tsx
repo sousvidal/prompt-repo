@@ -29,8 +29,11 @@ import { Badge } from '~/components/ui/badge';
 import { toast } from 'sonner';
 import { PlayIcon } from 'lucide-react';
 import PublishedCircles from '~/components/published-circles';
+import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  await redirectToLoginIfNotAuthenticated(request);
+  
   const prisma = new PrismaClient();
   const prompt = await prisma.prompt.findUnique({
     where: { id: params.promptId },

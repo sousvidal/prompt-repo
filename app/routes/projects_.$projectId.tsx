@@ -15,13 +15,16 @@ import CreatePromptDialog from '~/components/create-prompt-dialog';
 import { generateSlug } from '~/lib/slug';
 import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
+import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 
 type PromptFormData = {
   name: string;
   description: string;
 }
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  await redirectToLoginIfNotAuthenticated(request); 
+
   const prisma = new PrismaClient();
   const project = await prisma.project.findUnique({
     where: { id: params.projectId },
