@@ -17,7 +17,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 import { useCopyToClipboard } from "@uidotdev/usehooks";
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 
 type PromptFormData = {
@@ -80,6 +80,11 @@ export default function ProjectDetails() {
     header: () => <div className="text-right">Actions</div>,
   }];
 
+  const handleCopy = useCallback((text: string) => {
+    console.log("copying", text);
+    copyToClipboard(text);
+  }, [copyToClipboard]);
+
   return (
   <div className="flex flex-col m-4 container mx-auto gap-4">
       <Breadcrumb>
@@ -109,8 +114,8 @@ export default function ProjectDetails() {
                   <div className='text-sm font-medium leading-none'>API Key</div>
                   <div className='text-sm leading-none text-muted-foreground'>
                     {apiKey.key}
-                    <Button variant="ghost" size="icon">
-                      <CopyIcon onClick={() => copyToClipboard(apiKey.key)} />
+                    <Button variant="ghost" size="icon" onClick={() => handleCopy(apiKey.key)}>
+                      <CopyIcon />
                     </Button>
                   </div>
                 </div>

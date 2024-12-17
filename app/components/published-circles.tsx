@@ -14,7 +14,7 @@ export default function PublishedCircles({
   const renderCircle = (environment: string) => {
     const color =
       environment === "local"
-        ? "#cbd5e1"
+        ? "#cbd5e1" // gray
         : environment === "staging"
         ? "#facc15" // yellow
         : environment === "acceptance"
