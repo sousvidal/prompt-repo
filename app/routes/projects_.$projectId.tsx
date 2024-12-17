@@ -16,6 +16,9 @@ import { generateSlug } from '~/lib/slug';
 import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
+import { useCopyToClipboard } from "@uidotdev/usehooks";
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 type PromptFormData = {
   name: string;
@@ -55,6 +58,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 export default function ProjectDetails() {
   const project: Project | null = useLoaderData<typeof loader>();
+  const [copiedText, copyToClipboard] = useCopyToClipboard();
+
+  useEffect(() => {
+    if (copiedText) {
+      toast.success('Copied to clipboard');
+    }
+  }, [copiedText]);
 
   const columns: ColumnDef<Prompt>[] = [
     { header: 'Name', accessorKey: 'name', cell: ({ row }) => <Link to={`/projects/${project?.id}/prompts/${row.original.id}`} className="hover:underline font-medium">{row.original.name}</Link> },
@@ -100,7 +110,7 @@ export default function ProjectDetails() {
                   <div className='text-sm leading-none text-muted-foreground'>
                     {apiKey.key}
                     <Button variant="ghost" size="icon">
-                      <CopyIcon />
+                      <CopyIcon onClick={() => copyToClipboard(apiKey.key)} />
                     </Button>
                   </div>
                 </div>
