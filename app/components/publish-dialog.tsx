@@ -70,6 +70,7 @@ export default function PublishDialog({ isDisabled, onPublish, commit }: { isDis
         </DialogDescription>
         <div className="grid gap-4 py-4">
           {renderCheckbox('local')}
+          {renderCheckbox('staging')}
           {renderCheckbox('acceptance')}
           {renderCheckbox('production')}
         </div>
