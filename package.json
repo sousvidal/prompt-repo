@@ -10,7 +10,7 @@
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
     "prebuild": "prisma generate",
-    "prestart": "prisma migrate deploy && npx prisma db seed",
+    "prestart": "prisma migrate deploy",
     "prisma-dev": "prisma generate && prisma migrate dev && prisma db push"
   },
   "dependencies": {
