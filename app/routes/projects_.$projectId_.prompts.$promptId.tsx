@@ -1,4 +1,4 @@
-import { PrismaClient, Prompt } from '@prisma/client'
+import { Prompt } from '@prisma/client'
 import { LoaderFunctionArgs } from '@remix-run/node'
 import { Outlet, useLoaderData, useNavigate, useParams, useSearchParams } from '@remix-run/react';
 import {
@@ -30,28 +30,11 @@ import { toast } from 'sonner';
 import { PlayIcon } from 'lucide-react';
 import PublishedCircles from '~/components/published-circles';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
+import { getPrompt } from '~/services/prompt.server';
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   await redirectToLoginIfNotAuthenticated(request);
-  
-  const prisma = new PrismaClient();
-  const prompt = await prisma.prompt.findUnique({
-    where: { id: params.promptId },
-    include: {
-      commits: {
-        include: {
-          messages: true,
-          publishedCommits: true,
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      },
-      project: true,
-    }
-  });
-  prisma.$disconnect();
-  return prompt;
+  return getPrompt(params.promptId as string);
 }
 
 export default function PromptDetails() {

@@ -1,4 +1,4 @@
-import { Project, PrismaClient, Prompt } from '@prisma/client'
+import { Project, Prompt } from '@prisma/client'
 import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import { Link, redirect, useActionData, useLoaderData } from '@remix-run/react';
 import { CopyIcon } from 'lucide-react';
@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "~/components/ui/card"
 import CreatePromptDialog from '~/components/dialogs/create-prompt-dialog';
-import { generateSlug } from '~/lib/slug';
 import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
@@ -20,52 +19,25 @@ import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import DeleteDialog from '~/components/dialogs/delete-dialog';
-
-type PromptFormData = {
-  name: string;
-  description: string;
-}
+import { createPrompt, deletePrompt, PromptFormData } from '~/services/prompt.server';
+import { getProject } from '~/services/project.server';
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   await redirectToLoginIfNotAuthenticated(request); 
-
-  const prisma = new PrismaClient();
-  const project = await prisma.project.findUnique({
-    where: { id: params.projectId },
-    include: {
-      prompts: true,
-      apiKeys: true,
-    },
-  });
-  prisma.$disconnect();
-  return project;
+  return getProject(params.projectId as string);
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
   try {
-    const prisma = new PrismaClient();
     const formData = await request.formData();
-    let promptId: string | null = null;
-
     if (request.method === 'DELETE') {
-      promptId = formData.get('itemId') as string;
-      // TODO: implement cascade delete
-      console.log('delete promptId', promptId);
-      prisma.$disconnect();
+      const promptId = formData.get('itemId') as string;
+      await deletePrompt(promptId);
       return redirect(`/projects/${params.projectId}`);
     } else {
       const data = Object.fromEntries(formData) as PromptFormData;
-      const prompt = await prisma.prompt.create({
-        data: {
-          name: data.name,
-          description: data.description,
-          slug: generateSlug(data.name),
-          projectId: params.projectId as string,
-        },
-      });
-      promptId = prompt.id;
-      prisma.$disconnect();
-      return redirect(`/projects/${params.projectId}/prompts/${promptId}`);
+      const prompt = await createPrompt(data, params.projectId as string);
+      return redirect(`/projects/${params.projectId}/prompts/${prompt.id}`);
     }
   } catch (error) {
     return Response.json({ error: `Failed to create prompt. Error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });

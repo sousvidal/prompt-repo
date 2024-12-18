@@ -1,4 +1,4 @@
-import { PrismaClient, Project } from '@prisma/client'
+import { Project } from '@prisma/client'
 import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { Link, redirect, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -7,47 +7,24 @@ import { DataTable } from '~/components/datatable';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 import DeleteDialog from '~/components/dialogs/delete-dialog';
-
-const generateSlug = (name: string) => {
-  return name.toLowerCase().replace(/ /g, '-');
-}
+import { createProject, deleteProject, getProjects, ProjectFormData } from '~/services/project.server';
 
 export async function loader({ request }: LoaderFunctionArgs): Promise<Project[]> {
   await redirectToLoginIfNotAuthenticated(request);
-
-  const prisma = new PrismaClient();
-  const projects = await prisma.project.findMany();
-  prisma.$disconnect();
-  return projects;
+  return getProjects();
 }
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const prisma = new PrismaClient();
-
   if (request.method === 'DELETE') {
-    // TODO: implement cascade delete
     const projectId = formData.get('itemId') as string;
-    console.log('delete projectId', projectId);
+    await deleteProject(projectId);
+    return redirect('/projects');
   } else {
-    const name = formData.get('name');
-    const description = formData.get('description');
-    await prisma.project.create({
-      data: {
-        name: name as string,
-        description: description as string,
-        slug: generateSlug(name as string),
-        apiKeys: {
-          create: {
-            key: crypto.randomUUID(),
-          },
-        },
-      },
-    });
+    const data = Object.fromEntries(formData) as ProjectFormData;
+    const project = await createProject(data);
+    return redirect(`/projects/${project.id}`);
   }
-
-  prisma.$disconnect();
-  return redirect('/projects');
 }
 
 export default function Projects() {
