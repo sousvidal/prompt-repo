@@ -1,23 +1,12 @@
 import { Prompt } from '@prisma/client'
 import { LoaderFunctionArgs } from '@remix-run/node'
-import { Outlet, useLoaderData, useNavigate, useParams, useSearchParams } from '@remix-run/react';
+import { useLoaderData, useNavigate, useParams, useSearchParams } from '@remix-run/react';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import DiscardChangesDialog from "~/components/dialogs/discard-changes-dialog";
 import { useCallback, useEffect, useState } from 'react';
@@ -25,12 +14,12 @@ import TestPromptDialog from '~/components/dialogs/test-prompt-dialog';
 import CommitDialog from '~/components/dialogs/commit-dialog';
 import PublishDialog from '~/components/dialogs/publish-dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
-import { Badge } from '~/components/ui/badge';
 import { toast } from 'sonner';
 import { PlayIcon } from 'lucide-react';
-import PublishedCircles from '~/components/published-circles';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 import { getPrompt } from '~/services/prompt.server';
+import CommitSelector from '~/components/prompts/commit-selector';
+import MessageEditor from '~/components/prompts/message-editor';
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   await redirectToLoginIfNotAuthenticated(request);
@@ -197,35 +186,15 @@ export default function PromptDetails() {
           <CardDescription>{prompt?.description}</CardDescription>
         </CardHeader>
       </Card>
+
       <div className="flex flex-row justify-between mt-4">
         <div className="flex flex-row gap-2">
-          <Select defaultValue="draft" value={selectedCommitId} onValueChange={handleCommitValueChange}>
-            <SelectTrigger className="w-[350px]">
-              <SelectValue placeholder="Select a commit" />
-            </SelectTrigger>
-            <SelectContent className="max-w-[350px]">
-              <SelectGroup>
-                <SelectLabel>Commits</SelectLabel>
-                {hasDraft && <SelectItem value="draft">Draft</SelectItem>}
-                {prompt?.commits.map((commit) => {
-                  const isLatest = commit.id === prompt.commits[0].id;
-                  return (
-                    <SelectItem key={commit.id} value={commit.id} className="truncate">
-                      <div className="flex flex-row justify-between w-[300px]">
-                        <div className="flex gap-2 items-center">
-                          {isLatest ? <Badge variant="secondary">Latest</Badge> : ''}
-                          {commit.description || commit.id}
-                        </div>
-                        <div className="flex justify-end items-center">
-                          <PublishedCircles publishedCommits={commit.publishedCommits} />
-                        </div>
-                      </div>
-                    </SelectItem>
-                  )
-                })}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <CommitSelector
+            selectedCommitId={selectedCommitId}
+            onValueChange={handleCommitValueChange}
+            hasDraft={hasDraft}
+            commits={prompt?.commits || []}
+          />
         </div>
         <div className="flex flex-row gap-2 justify-end">
           <Button variant="outline" disabled={!canTest} onClick={handleTest}>
@@ -236,36 +205,13 @@ export default function PromptDetails() {
           <PublishDialog isDisabled={!canPublish} onPublish={handlePublish} commit={getCommit(selectedCommitId)} /> 
         </div>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Message</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            <Select
-              defaultValue={'system'}
-              value={message?.role}
-              onValueChange={(value) => handleEditDraft('role', value)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Roles</SelectLabel>
-                  <SelectItem value="system">System</SelectItem>
-                  <SelectItem value="assistant">Assistant</SelectItem>
-                  <SelectItem value="user">User</SelectItem>
-               </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Textarea
-              placeholder="Message"
-              className="h-[300px]"
-              value={message?.content}
-              onChange={(e) => handleEditDraft('content', e.target.value)} />
-          </div>
-        </CardContent>
-      </Card>
+
+      <MessageEditor
+        message={message}
+        onRoleChange={(value) => handleEditDraft('role', value)}
+        onContentChange={(value) => handleEditDraft('content', value)}
+      />
+
       <DiscardChangesDialog
         onConfirm={dialog?.onConfirm}
         onCancel={dialog?.onCancel}
@@ -274,16 +220,12 @@ export default function PromptDetails() {
         description="Are you sure you want to discard the changes to your current draft?"
         isOpen={dialog?.isOpen || false}
       />
+      
       <TestPromptDialog
-        context={{
-          message,
-        }}
+        context={{ message }}
         isOpen={isTestDialogOpen}
         onClose={() => setIsTestDialogOpen(false)}
       />
-      <Outlet context={{
-        message,
-      }} />
     </div>
   );
 }

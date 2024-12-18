@@ -15,6 +15,8 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<Project[]
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  await redirectToLoginIfNotAuthenticated(request);
+
   const formData = await request.formData();
   if (request.method === 'DELETE') {
     const projectId = formData.get('itemId') as string;
