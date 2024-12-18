@@ -27,6 +27,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (request.method === 'DELETE') {
     // TODO: implement cascade delete
+    const projectId = formData.get('itemId') as string;
+    console.log('delete projectId', projectId);
   } else {
     const name = formData.get('name');
     const description = formData.get('description');

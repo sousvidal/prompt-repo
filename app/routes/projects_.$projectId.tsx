@@ -48,8 +48,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
     let promptId: string | null = null;
 
     if (request.method === 'DELETE') {
-      promptId = formData.get('promptId') as string;
+      promptId = formData.get('itemId') as string;
       // TODO: implement cascade delete
+      console.log('delete promptId', promptId);
+      prisma.$disconnect();
+      return redirect(`/projects/${params.projectId}`);
     } else {
       const data = Object.fromEntries(formData) as PromptFormData;
       const prompt = await prisma.prompt.create({
@@ -61,9 +64,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
         },
       });
       promptId = prompt.id;
+      prisma.$disconnect();
+      return redirect(`/projects/${params.projectId}/prompts/${promptId}`);
     }
-    prisma.$disconnect();
-    return redirect(`/projects/${params.projectId}/prompts/${promptId}`);
   } catch (error) {
     return Response.json({ error: `Failed to create prompt. Error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
   }
