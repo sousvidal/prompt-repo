@@ -23,17 +23,18 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 export async function action({ request, params }: ActionFunctionArgs) {
   await redirectToLoginIfNotAuthenticated(request);
+  const projectId = params.projectId!;
 
   try {
     const formData = await request.formData();
     if (request.method === 'DELETE') {
       const promptId = formData.get('itemId') as string;
       await deletePrompt(promptId);
-      return redirect(`/projects/${params.projectId}`);
+      return redirect(`/projects/${projectId}`);
     } else {
       const data = Object.fromEntries(formData) as PromptFormData;
-      const prompt = await createPrompt(data, params.projectId as string);
-      return redirect(`/projects/${params.projectId}/prompts/${prompt.id}`);
+      const prompt = await createPrompt(data, projectId as string);
+      return redirect(`/projects/${projectId}/prompts/${prompt.id}`);
     }
   } catch (error) {
     return Response.json({ error: `Failed to create prompt. Error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
@@ -53,7 +54,7 @@ export default function ProjectDetails() {
   return (
     <div className="flex flex-col m-4 container mx-auto gap-4">
       <Breadcrumbs replace={{
-        [project?.id]: project?.name,
+        [project!.id]: project!.name,
       }} />
       <Card>
         <CardHeader>

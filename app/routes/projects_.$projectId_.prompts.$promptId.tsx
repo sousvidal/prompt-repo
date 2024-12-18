@@ -13,7 +13,6 @@ import { useCallback, useEffect, useState } from 'react';
 import TestPromptDialog from '~/components/dialogs/test-prompt-dialog';
 import CommitDialog from '~/components/dialogs/commit-dialog';
 import PublishDialog from '~/components/dialogs/publish-dialog';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import { PlayIcon } from 'lucide-react';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
@@ -31,9 +30,13 @@ export default function PromptDetails() {
   const params = useParams();
   const navigate = useNavigate();
   const prompt: Prompt | null = useLoaderData<typeof loader>();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCommitId, setSelectedCommitId] = useState<string>(searchParams.get('commit') || 'draft');
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
+
+  const promptId = params.promptId!;
+  const projectId = params.projectId!;
 
   const [draft, setDraft] = useState({
     role: 'system',
@@ -76,7 +79,7 @@ export default function PromptDetails() {
 
   const handleCommit = async (description: string) => {
     try {
-      const response = await fetch(`/api/projects/${params.projectId}/prompts/${params.promptId}/commits`, {
+      const response = await fetch(`/api/projects/${projectId}/prompts/${promptId}/commits`, {
         method: 'POST',
         body: JSON.stringify({
           ...draft,
@@ -140,7 +143,7 @@ export default function PromptDetails() {
 
   const handlePublish = useCallback(async (environments: string[]) => {
     try {
-      await fetch(`/api/projects/${params.projectId}/prompts/${params.promptId}/commits/${selectedCommitId}/publish`, {
+      await fetch(`/api/projects/${projectId}/prompts/${promptId}/commits/${selectedCommitId}/publish`, {
           method: 'POST',
           body: JSON.stringify({
           environments,
@@ -158,14 +161,14 @@ export default function PromptDetails() {
     } catch (error) {
       return Response.json({ error: `Failed to publish. Error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
     }
-  }, [params.projectId, params.promptId, selectedCommitId, navigate]);
+  }, [projectId, promptId, selectedCommitId, navigate]);
 
   return (
     <div className="flex flex-col m-4 container mx-auto gap-4">
       <Breadcrumbs
         replace={{
-          [params.projectId]: prompt?.project.name,
-          [params.promptId]: prompt?.name,
+          [projectId]: prompt?.project.name,
+          [promptId]: prompt?.name,
         }}
         exclude={['prompts']}
       />
