@@ -6,7 +6,7 @@ import CreateProjectDialog from '~/components/dialogs/create-project-dialog';
 import { DataTable } from '~/components/datatable';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
-import DeleteProjectDialog from '~/components/dialogs/delete-project-dialog';
+import DeleteDialog from '~/components/dialogs/delete-dialog';
 
 const generateSlug = (name: string) => {
   return name.toLowerCase().replace(/ /g, '-');
@@ -56,7 +56,7 @@ export default function Projects() {
     { header: 'Slug', accessorKey: 'slug' },
     { accessorKey: 'actions', cell: ({ row }) => (
       <div className="flex justify-end">
-        <DeleteProjectDialog projectId={row.original.id} projectName={row.original.name} />
+        <DeleteDialog itemId={row.original.id} itemName={row.original.name} itemType="Project" />
       </div>
     ),
     header: () => <div className="text-right">Actions</div>,

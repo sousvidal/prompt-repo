@@ -1,7 +1,7 @@
 import { Project, PrismaClient, Prompt } from '@prisma/client'
 import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import { Link, redirect, useActionData, useLoaderData } from '@remix-run/react';
-import { CopyIcon, TrashIcon } from 'lucide-react';
+import { CopyIcon } from 'lucide-react';
 import { DataTable } from '~/components/datatable';
 import { Button } from '~/components/ui/button';
 import {
@@ -19,6 +19,7 @@ import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import DeleteDialog from '~/components/dialogs/delete-dialog';
 
 type PromptFormData = {
   name: string;
@@ -44,17 +45,25 @@ export async function action({ request, params }: ActionFunctionArgs) {
   try {
     const prisma = new PrismaClient();
     const formData = await request.formData();
-    const data = Object.fromEntries(formData) as PromptFormData;
-    const prompt = await prisma.prompt.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        slug: generateSlug(data.name),
-        projectId: params.projectId as string,
-      },
-    });
+    let promptId: string | null = null;
+
+    if (request.method === 'DELETE') {
+      promptId = formData.get('promptId') as string;
+      // TODO: implement cascade delete
+    } else {
+      const data = Object.fromEntries(formData) as PromptFormData;
+      const prompt = await prisma.prompt.create({
+        data: {
+          name: data.name,
+          description: data.description,
+          slug: generateSlug(data.name),
+          projectId: params.projectId as string,
+        },
+      });
+      promptId = prompt.id;
+    }
     prisma.$disconnect();
-    return redirect(`/projects/${params.projectId}/prompts/${prompt.id}`);
+    return redirect(`/projects/${params.projectId}/prompts/${promptId}`);
   } catch (error) {
     return Response.json({ error: `Failed to create prompt. Error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
   }
@@ -81,11 +90,9 @@ export default function ProjectDetails() {
     { header: 'Name', accessorKey: 'name', cell: ({ row }) => <Link to={`/projects/${project?.id}/prompts/${row.original.id}`} className="hover:underline font-medium">{row.original.name}</Link> },
     { header: 'Slug', accessorKey: 'slug' },
     { header: 'Description', accessorKey: 'description' },
-    { accessorKey: 'actions', cell: () => (
+    { accessorKey: 'actions', cell: ({ row }) => (
       <div className="flex justify-end">
-        <Button variant="destructive" size="sm" >
-          <TrashIcon />
-        </Button>
+        <DeleteDialog itemId={row.original.id} itemName={row.original.name} itemType="Prompt" />
       </div>
     ),
     header: () => <div className="text-right">Actions</div>,
