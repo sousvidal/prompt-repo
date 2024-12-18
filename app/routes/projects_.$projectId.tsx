@@ -1,6 +1,6 @@
 import { Project, PrismaClient, Prompt } from '@prisma/client'
 import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
-import { Link, redirect, useLoaderData } from '@remix-run/react';
+import { Link, redirect, useActionData, useLoaderData } from '@remix-run/react';
 import { CopyIcon, TrashIcon } from 'lucide-react';
 import { DataTable } from '~/components/datatable';
 import { Button } from '~/components/ui/button';
@@ -41,24 +41,35 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  const prisma = new PrismaClient();
-  const formData = await request.formData();
-  const data = Object.fromEntries(formData) as PromptFormData;
-  const prompt = await prisma.prompt.create({
-    data: {
-      name: data.name,
-      description: data.description,
-      slug: generateSlug(data.name),
-      projectId: params.projectId as string,
-    },
-  });
-  prisma.$disconnect();
-  return redirect(`/projects/${params.projectId}/prompts/${prompt.id}`);
+  try {
+    const prisma = new PrismaClient();
+    const formData = await request.formData();
+    const data = Object.fromEntries(formData) as PromptFormData;
+    const prompt = await prisma.prompt.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        slug: generateSlug(data.name),
+        projectId: params.projectId as string,
+      },
+    });
+    prisma.$disconnect();
+    return redirect(`/projects/${params.projectId}/prompts/${prompt.id}`);
+  } catch (error) {
+    return Response.json({ error: `Failed to create prompt. Error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
+  }
 }
 
 export default function ProjectDetails() {
   const project: Project | null = useLoaderData<typeof loader>();
   const [copiedText, copyToClipboard] = useCopyToClipboard();
+  const actionData = useActionData<typeof action>();
+
+  useEffect(() => {
+    if (actionData?.error) {
+      toast.error(actionData.error);
+    }
+  }, [actionData]);
 
   useEffect(() => {
     if (copiedText) {
@@ -81,7 +92,6 @@ export default function ProjectDetails() {
   }];
 
   const handleCopy = useCallback((text: string) => {
-    console.log("copying", text);
     copyToClipboard(text);
   }, [copyToClipboard]);
 
