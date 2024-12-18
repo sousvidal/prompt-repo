@@ -102,30 +102,34 @@ export default function PromptDetails() {
   const canTest = message?.role && message?.content;
 
   const handleCommit = async (description: string) => {
-    const response = await fetch(`/api/projects/${params.projectId}/prompts/${params.promptId}/commits`, {
-      method: 'POST',
-      body: JSON.stringify({
-        ...draft,
-        description,
-      }),
-    });
-    const commit = await response.json();
+    try {
+      const response = await fetch(`/api/projects/${params.projectId}/prompts/${params.promptId}/commits`, {
+        method: 'POST',
+        body: JSON.stringify({
+          ...draft,
+          description,
+        }),
+      });
+      const commit = await response.json();
 
-    // empty the draft
-    setDraft({
-      role: 'system',
-      content: '',
-      description: '',
-    });
+      // empty the draft
+      setDraft({
+        role: 'system',
+        content: '',
+        description: '',
+      });
 
-    // refresh the page
-    navigate({
-      pathname: '.',
-      search: `?commit=${commit.id}`,
-    });
+      // refresh the page
+      navigate({
+        pathname: '.',
+        search: `?commit=${commit.id}`,
+      });
 
-    // toast
-    toast.success('Commit saved successfully.');
+      // toast
+      toast.success('Commit saved successfully.');
+    } catch (error) {
+      return Response.json({ error: `Failed to commit. Error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
+    }
   }
 
   const showDialog = (onConfirm: () => void) => {
@@ -162,21 +166,25 @@ export default function PromptDetails() {
   }
 
   const handlePublish = useCallback(async (environments: string[]) => {
-    await fetch(`/api/projects/${params.projectId}/prompts/${params.promptId}/commits/${selectedCommitId}/publish`, {
-      method: 'POST',
-      body: JSON.stringify({
-        environments,
-      }),
-    });
+    try {
+      await fetch(`/api/projects/${params.projectId}/prompts/${params.promptId}/commits/${selectedCommitId}/publish`, {
+          method: 'POST',
+          body: JSON.stringify({
+          environments,
+        }),
+      });
 
-    // refresh the page
-    navigate({
-      pathname: '.',
-      search: `?commit=${selectedCommitId}`,
-    });
+      // refresh the page
+      navigate({
+        pathname: '.',
+        search: `?commit=${selectedCommitId}`,
+      });
 
-    // toast
-    toast.success('Published successfully.');
+      // toast
+      toast.success('Published successfully.');
+    } catch (error) {
+      return Response.json({ error: `Failed to publish. Error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
+    }
   }, [params.projectId, params.promptId, selectedCommitId, navigate]);
 
   return (
