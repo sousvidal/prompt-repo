@@ -2,12 +2,11 @@ import { PrismaClient, Project } from '@prisma/client'
 import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { Link, redirect, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { TrashIcon } from 'lucide-react';
-import CreateProjectDialog from '~/components/create-project-dialog';
+import CreateProjectDialog from '~/components/dialogs/create-project-dialog';
 import { DataTable } from '~/components/datatable';
-import { Button } from '~/components/ui/button';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
+import DeleteProjectDialog from '~/components/dialogs/delete-project-dialog';
 
 const generateSlug = (name: string) => {
   return name.toLowerCase().replace(/ /g, '-');
@@ -24,24 +23,28 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<Project[]
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const name = formData.get('name');
-  const description = formData.get('description');
-
   const prisma = new PrismaClient();
-  await prisma.project.create({
-    data: {
-      name: name as string,
-      description: description as string,
-      slug: generateSlug(name as string),
-      apiKeys: {
-        create: {
-          key: crypto.randomUUID(),
+
+  if (request.method === 'DELETE') {
+    // TODO: implement cascade delete
+  } else {
+    const name = formData.get('name');
+    const description = formData.get('description');
+    await prisma.project.create({
+      data: {
+        name: name as string,
+        description: description as string,
+        slug: generateSlug(name as string),
+        apiKeys: {
+          create: {
+            key: crypto.randomUUID(),
+          },
         },
       },
-    },
-  });
-  prisma.$disconnect();
+    });
+  }
 
+  prisma.$disconnect();
   return redirect('/projects');
 }
 
@@ -51,11 +54,9 @@ export default function Projects() {
   const columns: ColumnDef<Project>[] = [
     { header: 'Name', accessorKey: 'name', cell: ({ row }) => <Link to={`/projects/${row.original.id}`} className="hover:underline font-medium">{row.original.name}</Link> },
     { header: 'Slug', accessorKey: 'slug' },
-    { accessorKey: 'actions', cell: () => (
+    { accessorKey: 'actions', cell: ({ row }) => (
       <div className="flex justify-end">
-        <Button variant="destructive" size="sm" >
-          <TrashIcon />
-        </Button>
+        <DeleteProjectDialog projectId={row.original.id} projectName={row.original.name} />
       </div>
     ),
     header: () => <div className="text-right">Actions</div>,

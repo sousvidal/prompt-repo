@@ -7,11 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
+} from "~/components/ui/dialog";
+import { Button } from "~/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
 import { Form } from "@remix-run/react";
 
 export default function CreatePromptDialog() {

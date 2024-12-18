@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card"
-import CreatePromptDialog from '~/components/create-prompt-dialog';
+import CreatePromptDialog from '~/components/dialogs/create-prompt-dialog';
 import { generateSlug } from '~/lib/slug';
 import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';

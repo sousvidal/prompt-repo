@@ -19,11 +19,11 @@ import {
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
-import DiscardChangesDialog from "~/components/discard-changes-dialog";
+import DiscardChangesDialog from "~/components/dialogs/discard-changes-dialog";
 import { useCallback, useEffect, useState } from 'react';
-import TestPromptDialog from '~/components/test-prompt-dialog';
-import CommitDialog from '~/components/commit-dialog';
-import PublishDialog from '~/components/publish-dialog';
+import TestPromptDialog from '~/components/dialogs/test-prompt-dialog';
+import CommitDialog from '~/components/dialogs/commit-dialog';
+import PublishDialog from '~/components/dialogs/publish-dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { Badge } from '~/components/ui/badge';
 import { toast } from 'sonner';

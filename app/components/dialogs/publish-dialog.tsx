@@ -7,9 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Checkbox } from "./ui/checkbox";
+} from "~/components/ui/dialog";
+import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import { useState } from "react";
 import { UploadIcon } from "lucide-react";
 import { Commit } from "@prisma/client";
