@@ -4,7 +4,7 @@ import { Link, redirect, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import CreateProjectDialog from '~/components/dialogs/create-project-dialog';
 import { DataTable } from '~/components/datatable';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
+import { Breadcrumbs } from '~/components/breadcrumbs';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 import DeleteDialog from '~/components/dialogs/delete-dialog';
 import { createProject, deleteProject, getProjects, ProjectFormData } from '~/services/project.server';
@@ -45,17 +45,7 @@ export default function Projects() {
 
   return (
     <div className="flex flex-col m-4 container mx-auto">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink>Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Projects</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Breadcrumbs />
       <div className="flex justify-end">
         <CreateProjectDialog />
       </div>

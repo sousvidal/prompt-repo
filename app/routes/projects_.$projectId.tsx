@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb';
 import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 import { toast } from 'sonner';
 import { createPrompt, deletePrompt, PromptFormData } from '~/services/prompt.server';
@@ -15,6 +14,7 @@ import { getProject } from '~/services/project.server';
 import ApiKeys from "~/components/projects/api-keys";
 import PromptsTable from "~/components/projects/prompts-table";
 import { useEffect } from 'react';
+import { Breadcrumbs } from '~/components/breadcrumbs';
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   await redirectToLoginIfNotAuthenticated(request); 
@@ -52,22 +52,9 @@ export default function ProjectDetails() {
 
   return (
     <div className="flex flex-col m-4 container mx-auto gap-4">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink>Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{project?.name}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      
+      <Breadcrumbs replace={{
+        [project?.id]: project?.name,
+      }} />
       <Card>
         <CardHeader>
           <CardTitle>{project?.name}</CardTitle>

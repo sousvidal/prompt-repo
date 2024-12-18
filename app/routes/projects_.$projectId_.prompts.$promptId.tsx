@@ -20,6 +20,7 @@ import { redirectToLoginIfNotAuthenticated } from '~/services/auth.server';
 import { getPrompt } from '~/services/prompt.server';
 import CommitSelector from '~/components/prompts/commit-selector';
 import MessageEditor from '~/components/prompts/message-editor';
+import { Breadcrumbs } from '~/components/breadcrumbs';
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   await redirectToLoginIfNotAuthenticated(request);
@@ -161,25 +162,13 @@ export default function PromptDetails() {
 
   return (
     <div className="flex flex-col m-4 container mx-auto gap-4">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink>Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/projects/${params.projectId}`}>{prompt?.project.name}</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{prompt?.name}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Breadcrumbs
+        replace={{
+          [params.projectId]: prompt?.project.name,
+          [params.promptId]: prompt?.name,
+        }}
+        exclude={['prompts']}
+      />
       <Card>
         <CardHeader>
           <CardTitle>{prompt?.name}</CardTitle>
